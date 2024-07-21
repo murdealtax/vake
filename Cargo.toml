@@ -1,6 +1,17 @@
 [package]
 name = "wake"
-version = "0.1.0"
+description = "Custom build tool for the In Silico project"
+version = "1.0.0"
 edition = "2021"
 
 [dependencies]
+bytes = "1.6.1"
+clap = { version = "3.2.25", features = ["derive"] }
+env_logger = "0.11.3"
+futures = "0.3.30"
+h2 = "0.4.5"
+http = "1.1.0"
+httparse = "1.9.4"
+hyper = "1.4.1"
+log = "0.4.22"
+tokio = {version = "1.38.1", features = ["full"]}
