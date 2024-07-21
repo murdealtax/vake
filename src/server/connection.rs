@@ -1,9 +1,11 @@
 use std::net::Ipv4Addr;
-use httparse::Header;
 use tokio::{io::{AsyncBufReadExt, AsyncWriteExt}, net::TcpListener};
 
 use log::{ info, debug, warn };
-use crate::{put, patch, delete};
+
+use crate::server::poll;
+use crate::server::close;
+use crate::server::sync;
 
 #[tokio::main]
 pub async fn listen( address: Ipv4Addr, port: u16 ) -> Result<(), std::io::Error> {
@@ -45,13 +47,13 @@ async fn connection_handler(mut socket: tokio::net::TcpStream, address: std::net
         debug!("Received a complete request from {}", address);
         match req.method.unwrap() {
             "PUT" => {
-                process_poll(headers);
+                poll::process(headers);
             },
             "DELETE" => {
-                process_close(headers);
+                close::process(headers);
             },
             "PATCH" => {
-                process_sync(headers);
+                sync::process(headers);
             },
             _ => {
                 warn!("Received an unsupported request from {}", address);
@@ -62,16 +64,4 @@ async fn connection_handler(mut socket: tokio::net::TcpStream, address: std::net
     } else {
         warn!("Client sent an incomplete request, closing connection");
     }
-}
-
-fn process_poll(headers: Vec<Header>) {
-
-}
-
-fn process_close(headers: Vec<Header>) {
-
-}
-
-fn process_sync(headers: Vec<Header>) {
-
 }

@@ -1,5 +1,8 @@
 mod connection;
 mod logger;
+mod poll;
+mod close;
+mod sync;
 
 use log::{ debug, error };
 use std::net::Ipv4Addr;
