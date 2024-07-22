@@ -10,7 +10,7 @@ use crate::server::sync;
 #[tokio::main]
 pub async fn listen( address: Ipv4Addr, port: u16 ) -> Result<(), std::io::Error> {
     let listener = TcpListener::bind((address, port)).await?;
-    info!("Server is listening at {address}:{port}");
+    info!("Server is listening at \x1b[93m{address}:{port}");
 
     loop {
         let (socket, address) = listener.accept().await?;
@@ -25,7 +25,7 @@ async fn connection_handler(mut socket: tokio::net::TcpStream, address: std::net
     let mut reader = tokio::io::BufReader::new(&mut socket);
     let mut buffer = String::new();
 
-    debug!("Incoming request from {}", address);
+    debug!("Incoming request from \x1b[93m{}", address);
 
     let mut line_count = 0;
     while reader.read_line(&mut buffer).await.unwrap() > 0 {
@@ -36,7 +36,7 @@ async fn connection_handler(mut socket: tokio::net::TcpStream, address: std::net
         line_count += 1;
     }
 
-    debug!("Received header of size {} bytes with {} lines", buffer.len(), line_count);
+    debug!("Received header of size \x1b[93m{}\x1b[0m bytes with \x1b[93m{}\x1b[0m lines", buffer.len(), line_count);
 
     let bytes = buffer.as_bytes();
     let mut headers = vec![httparse::EMPTY_HEADER; line_count];
@@ -44,19 +44,19 @@ async fn connection_handler(mut socket: tokio::net::TcpStream, address: std::net
     let result = req.parse(&bytes).unwrap();
 
     if result.is_complete() {
-        debug!("Received a complete request from {}", address);
+        debug!("Received a complete request from \x1b[93m{}", address);
         match req.method.unwrap() {
             "PUT" => {
-                poll::process(headers);
+                socket.write_all(poll::process(headers)).await.unwrap();
             },
             "DELETE" => {
-                close::process(headers);
+                socket.write_all(close::process(headers)).await.unwrap();
             },
             "PATCH" => {
-                sync::process(headers);
+                socket.write_all(sync::process(headers)).await.unwrap();
             },
             _ => {
-                warn!("Received an unsupported request from {}", address);
+                warn!("Received an unsupported request from \x1b[93m{}", address);
                 socket.write_all(b"HTTP/1.1 404 Not Found\r\n\r\n").await.unwrap();
             }
         }
