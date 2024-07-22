@@ -33,6 +33,8 @@ fn main() {
     let contents = fs::read_to_string(config_path)
         .expect("Should have been able to read the file");
 
+    println!("{:?}", lex::init(contents.as_str()));
+
     debug!("Debugging enabled!");
     info!("Starting Wake...");
     server::serve();
