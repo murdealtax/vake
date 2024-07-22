@@ -176,7 +176,7 @@ pub fn init(tokens: Vec<Token>) -> Recipe {
                         exit(1);
                     }
                 }
-            }
+            },
             _ => {
                 error!("Aborted due to malformed wakefile body");
                 error!("Unexpected token {:?} in wakefile", token);
