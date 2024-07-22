@@ -1,5 +1,4 @@
 use httparse::Header;
-use tokio::io::AsyncWriteExt;
 use crate::delete;
 
 pub fn process(headers: Vec<Header>) -> &'static [u8]  {
