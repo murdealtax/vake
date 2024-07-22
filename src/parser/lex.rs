@@ -13,17 +13,17 @@ pub enum Token {
     DoubleColon, Colon,
     Dot, Comma,
     LeftBracket, RightBracket,
-    LeftBrace, RightBrace
+    LeftBrace, RightBrace,
+    Bang
 }
 
-// Create a list of keywords to check against identifiers
-const KEYWORDS: [&str; 22] = [
+const KEYWORDS: [&str; 21] = [
     "workspace", "Workspace", "Players", "Lighting",
     "MaterialService", "NetworkClient", "ReplicatedFirst",
     "ReplicatedStorage", "ServerScriptService", "ServerStorage",
     "StarterGui", "StarterPack", "StarterPlayer", "StarterPlayerScripts",
     "StarterCharacterScripts", "Teams", "SoundService", "TextChatService",
-    "LocalScript", "Script", "ServerScript", "ModuleScript", 
+    "LocalScript", "Script", "ModuleScript"
 ];
 
 pub fn init(input: &str) -> Vec<Token> {
@@ -54,7 +54,8 @@ pub fn init(input: &str) -> Vec<Token> {
                 } else {
                     tokens.push(Token::Colon);
                 }
-            }, ',' => tokens.push(Token::Comma),
+            },
+            ',' => tokens.push(Token::Comma), '!' => tokens.push(Token::Bang),
             'a'..='z' | 'A'..='Z' | '_' | '-' => {
                 if character == '-' && characters.peek() == Some(&'>') {
                     characters.next();
