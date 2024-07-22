@@ -13,6 +13,7 @@ const OPTION_NAMES: [&str; 8] = [
     "preserve_folders"
 ];
 
+#[derive(Debug)]
 pub struct RecipeOptions {
     pub active_directory: String,
     pub case_type: CaseType,
@@ -24,6 +25,7 @@ pub struct RecipeOptions {
     pub preserve_folders: bool
 }
 
+#[derive(Debug)]
 pub enum CaseType {
     Pascal,
     Camel,
@@ -31,33 +33,40 @@ pub enum CaseType {
     Kebab
 }
 
+#[derive(Debug)]
 pub enum ScriptType {
     LocalScript,
     ServerScript,
     ModuleScript
 }
 
+#[derive(Debug)]
 pub enum ChildType {
     WaitChild,
     FindChild,
-    CreateChild
+    CreateChild,
+    Service
 }
 
+#[derive(Debug)]
 pub struct RecipeAssociation {
     pub path: PathBuf,
     pub script_type: ScriptType
 }
 
+#[derive(Debug)]
 pub struct RecipePath {
     pub path: String,
     pub child_type: ChildType
 }
 
+#[derive(Debug)]
 pub struct RecipeEntry {
     pub path: PathBuf,
     pub target: Vec<RecipePath>
 }
 
+#[derive(Debug)]
 pub struct Recipe {
     pub options: RecipeOptions,
     pub associations: Vec<RecipeAssociation>,
@@ -155,6 +164,19 @@ pub fn init(tokens: Vec<Token>) -> Recipe {
 
                 handle_option(&mut recipe, option, &mut iterator);
             },
+            Token::Identifier(name) => {
+                let path = build_path(name, &mut iterator);
+
+                match iterator.peek() {
+                    Some(Token::Arrow) => handle_entry(&mut recipe, path, &mut iterator),
+                    Some(Token::DoubleColon) => handle_association(&mut recipe, path, &mut iterator),
+                    _ => {
+                        error!("Aborted due to malformed wakefile body");
+                        error!("Unexpected token {:?} in wakefile", iterator.peek());
+                        exit(1);
+                    }
+                }
+            }
             _ => {
                 error!("Aborted due to malformed wakefile body");
                 error!("Unexpected token {:?} in wakefile", token);
@@ -183,7 +205,7 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
                 "snake" => recipe.options.case_type = CaseType::Snake,
                 "kebab" => recipe.options.case_type = CaseType::Kebab,
                 _ => {
-                    error!("Aborted due to malformed wakefile body");
+                    error!("Aborted due to malformed wakefile options");
                     error!("Unexpected case type {:?} in wakefile", value);
                     exit(1);
                 }
@@ -219,7 +241,7 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
                         break;
                     },
                     _ => {
-                        error!("Aborted due to malformed wakefile body");
+                        error!("Aborted due to malformed wakefile options");
                         error!("Unexpected token {:?} in wakefile", iterator.peek());
                         exit(1);
                     }
@@ -245,9 +267,100 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
             recipe.options.preserve_folders = value;
         },
         _ => {
-            error!("Aborted due to malformed wakefile body");
+            error!("Aborted due to malformed wakefile options");
             error!("Unexpected option {:?} in wakefile", option);
             exit(1);
         }
     }
+}
+
+fn handle_association(recipe: &mut Recipe, path: PathBuf, iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>) {
+    iterator.next();
+
+    let association = RecipeAssociation {
+        path: path,
+        script_type: match expect_value!(iterator, Keyword).as_str() {
+            "LocalScript" => ScriptType::LocalScript,
+            "ServerScript" => ScriptType::ServerScript,
+            "ModuleScript" => ScriptType::ModuleScript,
+            _ => {
+                error!("Aborted due to malformed wakefile association");
+                error!("Unexpected script type {:?} in wakefile", iterator.peek());
+                exit(1);
+            }
+        }
+    };
+
+    recipe.associations.push(association);
+}
+
+fn handle_entry(recipe: &mut Recipe, path: PathBuf, iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>) {
+    iterator.next();
+
+    let entry = RecipeEntry {
+        path: path,
+        target: build_tree(iterator)
+    };
+
+    recipe.entries.push(entry);
+}
+
+fn build_path(name: String, iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>) -> PathBuf {
+    let mut path = PathBuf::new();
+    path.push(name);
+
+    loop {
+        match iterator.peek() {
+            Some(Token::Arrow) | Some(Token::DoubleColon) => break,
+            Some(Token::Dot) => {
+                iterator.next();
+            },
+            Some(Token::Identifier(name)) => {
+                path.push(name);
+                iterator.next();
+            },
+            _ => {
+                error!("Aborted due to malformed wakefile path");
+                error!("Unexpected token {:?} in wakefile", iterator.peek());
+                exit(1);
+            }
+        }
+    }
+
+    return path;
+}
+
+fn build_tree(iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>) -> Vec<RecipePath> {
+    let mut tree: Vec<RecipePath> = vec![
+        RecipePath {
+            path: expect_value!(iterator, Keyword),
+            child_type: ChildType::Service
+        }
+    ];
+
+    loop {
+        match iterator.peek() {
+            Some(Token::Colon) => {
+                tree.push(RecipePath {
+                    path: expect_value!(iterator, Identifier),
+                    child_type: ChildType::WaitChild
+                })
+            },
+            Some(Token::Bang) => {
+                tree.push(RecipePath {
+                    path: expect_value!(iterator, Identifier),
+                    child_type: ChildType::CreateChild
+                })
+            },
+            Some(Token::Dot) => {
+                tree.push(RecipePath {
+                    path: expect_value!(iterator, Identifier),
+                    child_type: ChildType::FindChild
+                })
+            },
+            _ => break
+        }
+    }
+
+    return tree;
 }

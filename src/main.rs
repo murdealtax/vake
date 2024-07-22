@@ -36,6 +36,8 @@ fn main() {
     let tokens = lex::init(contents.as_str());
     let recipe = parse::init(tokens);
 
+    debug!("Recipe: {:#?}", recipe);
+
     debug!("Debugging enabled!");
     info!("Starting Wake...");
     server::serve();

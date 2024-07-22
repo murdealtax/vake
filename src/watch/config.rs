@@ -1,6 +1,16 @@
 use log::{ debug, warn };
 use std::path::{Path, PathBuf};
 
+const DEFAULT_WAKEFILE: &str = r#"# Wakefile Options
+:active_directory = "."
+:entry_name = "main.lua"
+
+# Use LocalScripts on the client
+client :: LocalScript
+
+# Example Recipe
+server -> ServerScriptService
+client -> StarterPlayerScripts"#;
 
 pub fn check_config() -> PathBuf {
     debug!("Checking for existance of wakefile");
@@ -21,7 +31,7 @@ pub fn check_config() -> PathBuf {
 
     if !found {
         warn!("No wakefile found, creating a new one...");
-        std::fs::write("wakefile", "task default {}").expect("Failed to create wakefile");
+        std::fs::write("wakefile", DEFAULT_WAKEFILE).expect("Failed to create wakefile");
     }
 
     return path;
