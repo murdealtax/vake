@@ -4,7 +4,7 @@ use clap::Parser;
 
 use wake::cli::Options;
 use wake::watch::config;
-use wake::parser::lex;
+use wake::parser::{lex, parse};
 use wake::server;
 
 use std::fs;
@@ -33,7 +33,8 @@ fn main() {
     let contents = fs::read_to_string(config_path)
         .expect("Should have been able to read the file");
 
-    println!("{:?}", lex::init(contents.as_str()));
+    let tokens = lex::init(contents.as_str());
+    let recipe = parse::init(tokens);
 
     debug!("Debugging enabled!");
     info!("Starting Wake...");

@@ -11,7 +11,7 @@ pub enum Token {
     True, False,
     Equal, Arrow,
     DoubleColon, Colon,
-    Dot,
+    Dot, Comma,
     LeftBracket, RightBracket,
     LeftBrace, RightBrace
 }
@@ -54,7 +54,7 @@ pub fn init(input: &str) -> Vec<Token> {
                 } else {
                     tokens.push(Token::Colon);
                 }
-            },
+            }, ',' => tokens.push(Token::Comma),
             'a'..='z' | 'A'..='Z' | '_' | '-' => {
                 if character == '-' && characters.peek() == Some(&'>') {
                     characters.next();
