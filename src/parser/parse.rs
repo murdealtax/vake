@@ -139,7 +139,7 @@ pub fn init(tokens: Vec<Token>) -> Recipe {
         case_exceptions: Vec::new(),
         entry_name: String::from("main.lua"),
         preprocess_text: true,
-        preprocess_pretty: true,
+        preprocess_pretty: false,
         preserve_folders: false
     };
 

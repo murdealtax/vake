@@ -4,7 +4,7 @@ use clap::Parser;
 
 use wake::cli::Options;
 use wake::watch::config;
-use wake::parser::{lex, parse, check};
+use wake::parser::{self, check, lex, parse};
 use wake::server;
 
 use std::fs;

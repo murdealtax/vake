@@ -24,15 +24,19 @@ pub fn init(recipe: &Recipe) {
     }
 
     for entry in entries {
-        if !entry.path.exists() {
-            error!("The directory specified for recipe '{}' does not exist", active_directory.join(entry.path.clone()).display());
+        let path = active_directory.join(entry.path.clone());
+
+        if !path.exists() {
+            error!("The directory specified for recipe '{}' does not exist", path.display());
             recipe_errors += 1;
         }
     }
 
     for association in associations {
-        if !association.path.exists() {
-            error!("The directory specified for association '{}' does not exist", active_directory.join(association.path.clone()).display());
+        let path = active_directory.join(association.path.clone());
+
+        if !path.exists() {
+            error!("The directory specified for association '{}' does not exist", path.display());
             recipe_errors += 1;
         }
     }
