@@ -1,10 +1,10 @@
-use log::{ debug, info };
+use log::info;
 use std::io::Write;
 use clap::Parser;
 
 use wake::cli::Options;
 use wake::watch::config;
-use wake::parser::{lex, parse};
+use wake::parser::{lex, parse, check};
 use wake::server;
 
 use std::fs;
@@ -36,9 +36,8 @@ fn main() {
     let tokens = lex::init(contents.as_str());
     let recipe = parse::init(tokens);
 
-    debug!("Recipe: {:#?}", recipe);
+    check::init(&recipe);
 
-    debug!("Debugging enabled!");
-    info!("Starting Wake...");
+    info!("Loaded recipe with {} entry(s) and {} association(s)", recipe.entries.len(), recipe.associations.len());
     server::serve();
 }
