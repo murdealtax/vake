@@ -3,25 +3,28 @@ use tokio::{io::{AsyncBufReadExt, AsyncWriteExt}, net::TcpListener};
 
 use log::{ info, debug, warn };
 
-use crate::server::poll;
+use crate::{parser::parse::Recipe, server::poll, watch::ProjectQueue};
 use crate::server::close;
 use crate::server::sync;
 
 #[tokio::main]
-pub async fn listen( address: Ipv4Addr, port: u16 ) -> Result<(), std::io::Error> {
+pub async fn listen(address: Ipv4Addr, port: u16, queue: &ProjectQueue, recipe: Recipe) -> Result<(), std::io::Error> {
+    info!("Here");
     let listener = TcpListener::bind((address, port)).await?;
     info!("Server is listening at \x1b[93m{address}:{port}");
 
     loop {
         let (socket, address) = listener.accept().await?;
+        let queue: ProjectQueue = queue.clone();
+        let recipe: Recipe = recipe.clone();
 
         tokio::spawn(async move {
-            connection_handler(socket, address).await;
+            connection_handler(socket, address, queue, recipe).await;
         });
     }
 }
 
-async fn connection_handler(mut socket: tokio::net::TcpStream, address: std::net::SocketAddr) {
+async fn connection_handler(mut socket: tokio::net::TcpStream, address: std::net::SocketAddr, queue: ProjectQueue, recipe: Recipe) {
     let mut reader = tokio::io::BufReader::new(&mut socket);
     let mut buffer = String::new();
 
@@ -47,7 +50,7 @@ async fn connection_handler(mut socket: tokio::net::TcpStream, address: std::net
         debug!("Received a complete request from \x1b[93m{}", address);
         match req.method.unwrap() {
             "PUT" => {
-                socket.write_all(poll::process(headers)).await.unwrap();
+                socket.write_all(poll::process(headers, queue, recipe).as_bytes()).await.unwrap();
             },
             "DELETE" => {
                 socket.write_all(close::process(headers)).await.unwrap();

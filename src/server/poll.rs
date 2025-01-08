@@ -1,8 +1,26 @@
 use httparse::Header;
+use crate::parser::parse::Recipe;
 use crate::put;
+use crate::watch::ProjectQueue;
 
-pub fn process(headers: Vec<Header>) -> &'static [u8] {
-    put!("Updating client, sending \x1b[93mX\x1b[0m bytes updating \x1b[93mX\x1b[0m files");
+pub fn process(_headers: Vec<Header>, queue: ProjectQueue, recipe: Recipe) -> String {
+    let length = queue.queue.len();
+    if length == 0 {
+        return "HTTP/1.1 200 OK\r\n\r\n".to_string();
+    }
 
-    return b"HTTP/1.1 200 OK\r\n\r\n";
+    let data = queue.serialize(recipe);
+
+    put!("Updating client, sending \x1b[93m{}\x1b[0m bytes updating \x1b[93m{}\x1b[0m files", data.len(), queue.queue.len());
+    return build_response(data);
+}
+
+fn build_response(data: String) -> String {
+    let mut response = "HTTP/1.1 200 OK\r\n".to_owned();
+    response.push_str("Content-Type: text/plain\r\n");
+    response.push_str(&format!("Content-Length: {}", data.len()));
+    response.push_str("\r\n\r\n");
+    response.push_str(&data);
+
+    return response;
 }

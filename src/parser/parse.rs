@@ -13,9 +13,9 @@ const OPTION_NAMES: [&str; 8] = [
     "preserve_folders"
 ];
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RecipeOptions {
-    pub active_directory: String,
+    pub active_directory: PathBuf,
     pub case_type: CaseType,
     pub case_abbreviations: bool,
     pub case_exceptions: Vec<String>,
@@ -25,7 +25,7 @@ pub struct RecipeOptions {
     pub preserve_folders: bool
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum CaseType {
     Pascal,
     Camel,
@@ -33,14 +33,14 @@ pub enum CaseType {
     Kebab
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum ScriptType {
     LocalScript,
     ServerScript,
     ModuleScript
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ChildType {
     WaitChild,
     FindChild,
@@ -48,25 +48,25 @@ pub enum ChildType {
     Service
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RecipeAssociation {
     pub path: PathBuf,
     pub script_type: ScriptType
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RecipePath {
     pub path: String,
     pub child_type: ChildType
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RecipeEntry {
     pub path: PathBuf,
     pub target: Vec<RecipePath>
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Recipe {
     pub options: RecipeOptions,
     pub associations: Vec<RecipeAssociation>,
@@ -133,7 +133,7 @@ pub fn init(tokens: Vec<Token>) -> Recipe {
 
     let mut iterator = tokens.into_iter().peekable();
     let default_options = RecipeOptions {
-        active_directory: String::from("src"),
+        active_directory: PathBuf::from("src"),
         case_type: CaseType::Pascal,
         case_abbreviations: false,
         case_exceptions: Vec::new(),
@@ -194,7 +194,7 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
     match option.as_str() {
         "active_directory" => {
             let value = expect_value!(iterator, String);
-            recipe.options.active_directory = value;
+            recipe.options.active_directory = PathBuf::from(value);
         },
         "case_type" => {
             let value = expect_value!(iterator, Identifier);

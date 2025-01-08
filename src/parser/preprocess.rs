@@ -1,7 +1,6 @@
 use super::parse::RecipeOptions;
 
 pub fn process_text(text: &str, options: &RecipeOptions) -> String {
-    
     let longest_escape = string_escape(text);
     let mut block = String::from("return ");
 
@@ -36,7 +35,6 @@ pub fn process_text(text: &str, options: &RecipeOptions) -> String {
     }
 
     return block;
-
 }
 
 fn string_escape(text: &str) -> i32 {

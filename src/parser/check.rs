@@ -1,5 +1,4 @@
-use std::path::Path;
-use log::{error};
+use log::error;
 
 use super::parse::Recipe;
 
@@ -8,13 +7,13 @@ pub fn init(recipe: &Recipe) {
     let entries = &recipe.entries;
     let associations = &recipe.associations;
 
-    let active_directory = Path::new(options.active_directory.as_str());
+    let active_directory = options.active_directory.as_path();
     let entry_file = active_directory.join(options.entry_name.as_str());
 
     let mut recipe_errors = 0;
 
     if !active_directory.exists() {
-        error!("The active directory '{}' does not exist", options.active_directory);
+        error!("The active directory '{:?}' does not exist", options.active_directory.as_os_str().to_str().expect("Expected a specified directory"));
         recipe_errors += 1;
     }
 
@@ -42,7 +41,7 @@ pub fn init(recipe: &Recipe) {
     }
 
     if recipe_errors > 0 {
-        error!("Recipe failed with {} error(s) when attempting to build from directory '{}'", recipe_errors, options.active_directory);
+        error!("Recipe failed with {} error(s) when attempting to build from directory '{}'", recipe_errors, options.active_directory.as_os_str().to_str().expect("Expected a specified directory"));
         std::process::exit(1);
     }
 }

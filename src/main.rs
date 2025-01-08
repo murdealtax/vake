@@ -4,7 +4,7 @@ use clap::Parser;
 
 use wake::cli::Options;
 use wake::watch::config;
-use wake::parser::{self, check, lex, parse};
+use wake::parser::{check, lex, parse};
 use wake::server;
 
 use std::fs;
@@ -39,5 +39,5 @@ fn main() {
     check::init(&recipe);
 
     info!("Loaded recipe with {} entry(s) and {} association(s)", recipe.entries.len(), recipe.associations.len());
-    server::serve();
+    server::serve(recipe);
 }
