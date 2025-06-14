@@ -22,7 +22,9 @@ pub struct RecipeOptions {
     pub entry_name: String,
     pub preprocess_text: bool,
     pub preprocess_pretty: bool,
-    pub preserve_folders: bool
+    pub preserve_folders: bool,
+    pub cc: Option<String>,
+    pub cflags: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -140,7 +142,9 @@ pub fn init(tokens: Vec<Token>) -> Recipe {
         entry_name: String::from("main.lua"),
         preprocess_text: true,
         preprocess_pretty: false,
-        preserve_folders: false
+        preserve_folders: false,
+        cc: Option::None,
+        cflags: Option::None,
     };
 
     let mut recipe = Recipe {
@@ -177,6 +181,19 @@ pub fn init(tokens: Vec<Token>) -> Recipe {
                     }
                 }
             },
+            Token::Slash => {
+                let path = build_path(String::new(), &mut iterator);
+
+                match iterator.peek() {
+                    Some(Token::Arrow) => handle_entry(&mut recipe, path, &mut iterator),
+                    Some(Token::DoubleColon) => handle_association(&mut recipe, path, &mut iterator),
+                    _ => {
+                        error!("Aborted due to malformed wakefile body");
+                        error!("Unexpected token {:?} in wakefile", iterator.peek());
+                        exit(1);
+                    }
+                }
+            }
             _ => {
                 error!("Aborted due to malformed wakefile body");
                 error!("Unexpected token {:?} in wakefile", token);
@@ -266,6 +283,14 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
             let value = expect_boolean!(iterator);
             recipe.options.preserve_folders = value;
         },
+        "cc" => {
+            let value = expect_value!(iterator, String);
+            recipe.options.cc = Some(value);
+        },
+        "cflags" => {
+            let value = expect_value!(iterator, String);
+            recipe.options.cflags = Some(value);
+        },
         _ => {
             error!("Aborted due to malformed wakefile options");
             error!("Unexpected option {:?} in wakefile", option);
@@ -341,18 +366,21 @@ fn build_tree(iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>) -> 
     loop {
         match iterator.peek() {
             Some(Token::Colon) => {
+                iterator.next();
                 tree.push(RecipePath {
                     path: expect_value!(iterator, Identifier),
                     child_type: ChildType::WaitChild
                 })
             },
             Some(Token::Bang) => {
+                iterator.next();
                 tree.push(RecipePath {
                     path: expect_value!(iterator, Identifier),
                     child_type: ChildType::CreateChild
                 })
             },
             Some(Token::Dot) => {
+                iterator.next();
                 tree.push(RecipePath {
                     path: expect_value!(iterator, Identifier),
                     child_type: ChildType::FindChild

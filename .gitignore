@@ -4,3 +4,5 @@ target
 wakefile
 .wakefile
 .wake
+
+*.lua

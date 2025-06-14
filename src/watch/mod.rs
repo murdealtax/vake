@@ -3,10 +3,10 @@ pub mod serialize;
 
 use log::{ debug, error };
 
-use std::collections::HashMap;
-use std::path::PathBuf;
-use std::sync::mpsc;
-use std::fs::metadata;
+use std::{collections::HashMap, sync::Arc};
+use std::path::{Path, PathBuf};
+use std::sync::{mpsc, Mutex};
+use std::fs::{self, metadata};
 
 use notify::{Event, RecursiveMode, Watcher};
 
@@ -33,8 +33,29 @@ impl ProjectQueue {
         self.queue.insert(path, action);
     }
 
-    pub fn serialize(&self, recipe: Recipe) -> String {
+    pub fn serialize(&mut self, recipe: Recipe) -> String {
         serialize::build(self, recipe)
+    }
+
+    pub fn all(&mut self, recipe: &Recipe) {
+        let dir = &recipe.options.active_directory;
+        Self::visit_files(dir, &mut |path| {
+            debug!("Sending file {:?}", path);
+            self.push(path, ActionType::Create);
+        });
+    }
+
+    fn visit_files(path: &Path, f: &mut impl FnMut(PathBuf)) {
+        if let Ok(entries) = fs::read_dir(path) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_file() {
+                    f(path);
+                } else if path.is_dir() {
+                    Self::visit_files(&path, f);
+                }
+            }
+        }
     }
 
     pub fn clear(&mut self) {
@@ -42,7 +63,7 @@ impl ProjectQueue {
     }
 }
 
-pub fn daemon(directory: &PathBuf, queue: &mut ProjectQueue) -> Result<(), notify::Error> {
+pub fn daemon(directory: &PathBuf, queue: &Arc<Mutex<ProjectQueue>>) -> Result<(), notify::Error> {
     debug!("Starting daemon on directory '{}'", directory.as_os_str().to_str().expect("Expected a specified directory"));
     let (sender, reciever) = mpsc::channel::<Result<Event, notify::Error>>();
     let mut watcher = notify::recommended_watcher(sender)?;
@@ -56,12 +77,11 @@ pub fn daemon(directory: &PathBuf, queue: &mut ProjectQueue) -> Result<(), notif
         }
     }
 
-    println!("Daemon");
-
     return daemon;
 }
 
-fn process_event(event: Event, queue: &mut ProjectQueue) {
+fn process_event(event: Event, queue: &Arc<Mutex<ProjectQueue>>) {
+    let mut queue = queue.lock().unwrap();
     for path in event.paths {
         let metadata = metadata(path.clone());
         if metadata.is_err() {

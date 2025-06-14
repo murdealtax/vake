@@ -14,15 +14,15 @@ pub enum Token {
     Dot, Comma,
     LeftBracket, RightBracket,
     LeftBrace, RightBrace,
-    Bang
+    Bang, Slash
 }
 
-const KEYWORDS: [&str; 21] = [
+const KEYWORDS: [&str; 19] = [
     "workspace", "Workspace", "Players", "Lighting",
     "MaterialService", "NetworkClient", "ReplicatedFirst",
     "ReplicatedStorage", "ServerScriptService", "ServerStorage",
-    "StarterGui", "StarterPack", "StarterPlayer", "StarterPlayerScripts",
-    "StarterCharacterScripts", "Teams", "SoundService", "TextChatService",
+    "StarterGui", "StarterPack", "StarterPlayer", 
+    "Teams", "SoundService", "TextChatService",
     "LocalScript", "Script", "ModuleScript"
 ];
 
@@ -55,6 +55,7 @@ pub fn init(input: &str) -> Vec<Token> {
                     tokens.push(Token::Colon);
                 }
             },
+            '/' => tokens.push(Token::Slash),
             ',' => tokens.push(Token::Comma), '!' => tokens.push(Token::Bang),
             'a'..='z' | 'A'..='Z' | '_' | '-' => {
                 if character == '-' && characters.peek() == Some(&'>') {
