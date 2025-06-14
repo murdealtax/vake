@@ -7,7 +7,7 @@ collection_service = game\GetService "CollectionService"
 return if not run_service\isEdit! or run_service\isRunning!
 
 toolbar = plugin\CreateToolbar "Wake"
-enable_button = toolbar\CreateButton "Enable", "Enable the plugin", "rbxassetid://4458901694"
+enable_button = toolbar\CreateButton "Enable", "Enable the plugin", "rbxassetid://132587592854748"
 enable_button.ClickableWhenViewportHidden = true
 
 get_hash = () -> math.random 0xff, 0xffffff
