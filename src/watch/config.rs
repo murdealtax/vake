@@ -9,8 +9,9 @@ const DEFAULT_VAKEFILE: &str = r#"# Vakefile Options
 client :: LocalScript
 
 # Example Recipe
-server -> ServerScriptService
-client -> StarterPlayerScripts"#;
+/ -> ServerScriptService
+server -> ServerScriptService:Main
+client -> StarterPlayer.StarterPlayerScripts"#;
 
 pub fn check_config() -> PathBuf {
     debug!("Checking for existance of vakefile");

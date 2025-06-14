@@ -4,7 +4,6 @@ description = "Custom build tool for the In Silico project"
 version = "1.0.0"
 edition = "2021"
 license = "MIT"
-license-file = "LICENSE.md"
 
 [dependencies]
 base64 = "0.22.1"
