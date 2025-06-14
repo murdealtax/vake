@@ -1,7 +1,7 @@
 use log::{ debug, warn };
 use std::path::{Path, PathBuf};
 
-const DEFAULT_vakeFILE: &str = r#"# Vakefile Options
+const DEFAULT_VAKEFILE: &str = r#"# Vakefile Options
 :active_directory = "."
 :entry_name = "main.lua"
 
@@ -31,7 +31,7 @@ pub fn check_config() -> PathBuf {
 
     if !found {
         warn!("No vakefile found, creating a new one...");
-        std::fs::write("vakefile", DEFAULT_vakeFILE).expect("Failed to create vakefile");
+        std::fs::write("vakefile", DEFAULT_VAKEFILE).expect("Failed to create vakefile");
     }
 
     return path;
