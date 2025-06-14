@@ -1,7 +1,7 @@
 use clap::Parser;
 
 #[derive(Debug, Parser)]
-#[clap(name = "Wake", version, about)]
+#[clap(name = "Vake", version, about)]
 pub struct Options {
     #[clap(flatten)]
     pub global: GlobalOptions,

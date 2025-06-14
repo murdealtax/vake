@@ -1,8 +1,8 @@
 test
 target
 
-wakefile
-.wakefile
-.wake
+vakefile
+.vakefile
+.vake
 
 *.lua

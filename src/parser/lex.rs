@@ -119,7 +119,7 @@ pub fn init(input: &str) -> Vec<Token> {
                 tokens.push(Token::String(string));
             },
             _ => {
-                error!("Unexpected \"{}\" when parsing wakefile on line \x1b[93m{}\x1b[0m:", character, line);
+                error!("Unexpected \"{}\" when parsing vakefile on line \x1b[93m{}\x1b[0m:", character, line);
                 error!("\x1b[93m{} \x1b[90m| \x1b[0m{}", line, input.lines().nth(line - 1).unwrap());
                 exit(1);
             }

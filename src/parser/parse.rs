@@ -80,13 +80,13 @@ macro_rules !expect {
         match $iterator.next() {
             Some($token) => {},
             Some(token) => {
-                error!("Aborted due to malformed wakefile body");
-                error!("Unexpected token {:?} in wakefile", token);
+                error!("Aborted due to malformed vakefile body");
+                error!("Unexpected token {:?} in vakefile", token);
                 exit(1);
             }
             _ => {
-                error!("Aborted due to malformed wakefile body");
-                error!("Unexpected end of file in wakefile");
+                error!("Aborted due to malformed vakefile body");
+                error!("Unexpected end of file in vakefile");
                 exit(1);
             }
         }
@@ -98,13 +98,13 @@ macro_rules !expect_value {
         match $iterator.next() {
             Some(Token::$token_type(name)) => Some(name),
             Some(token) => {
-                error!("Aborted due to malformed wakefile body");
-                error!("Unexpected token {:?} in wakefile", token);
+                error!("Aborted due to malformed vakefile body");
+                error!("Unexpected token {:?} in vakefile", token);
                 exit(1);
             }
             _ => {
-                error!("Aborted due to malformed wakefile body");
-                error!("Unexpected end of file in wakefile");
+                error!("Aborted due to malformed vakefile body");
+                error!("Unexpected end of file in vakefile");
                 exit(1);
             }
         }.unwrap()
@@ -117,13 +117,13 @@ macro_rules !expect_boolean {
             Some(Token::True) => true,
             Some(Token::False) => false,
             Some(token) => {
-                error!("Aborted due to malformed wakefile body");
-                error!("Unexpected token {:?} in wakefile", token);
+                error!("Aborted due to malformed vakefile body");
+                error!("Unexpected token {:?} in vakefile", token);
                 exit(1);
             }
             _ => {
-                error!("Aborted due to malformed wakefile body");
-                error!("Unexpected end of file in wakefile");
+                error!("Aborted due to malformed vakefile body");
+                error!("Unexpected end of file in vakefile");
                 exit(1);
             }
         }
@@ -131,7 +131,7 @@ macro_rules !expect_boolean {
 }
 
 pub fn init(tokens: Vec<Token>) -> Recipe {
-    debug!("Parsing wakefile with {} tokens", tokens.len());
+    debug!("Parsing vakefile with {} tokens", tokens.len());
 
     let mut iterator = tokens.into_iter().peekable();
     let default_options = RecipeOptions {
@@ -159,8 +159,8 @@ pub fn init(tokens: Vec<Token>) -> Recipe {
                 let option = expect_value!(iterator, Identifier);
 
                 if !OPTION_NAMES.contains(&option.as_str()) {
-                    error!("Aborted due to malformed wakefile body");
-                    error!("Unexpected option {:?} in wakefile", option);
+                    error!("Aborted due to malformed vakefile body");
+                    error!("Unexpected option {:?} in vakefile", option);
                     exit(1);
                 }
 
@@ -175,8 +175,8 @@ pub fn init(tokens: Vec<Token>) -> Recipe {
                     Some(Token::Arrow) => handle_entry(&mut recipe, path, &mut iterator),
                     Some(Token::DoubleColon) => handle_association(&mut recipe, path, &mut iterator),
                     _ => {
-                        error!("Aborted due to malformed wakefile body");
-                        error!("Unexpected token {:?} in wakefile", iterator.peek());
+                        error!("Aborted due to malformed vakefile body");
+                        error!("Unexpected token {:?} in vakefile", iterator.peek());
                         exit(1);
                     }
                 }
@@ -188,15 +188,15 @@ pub fn init(tokens: Vec<Token>) -> Recipe {
                     Some(Token::Arrow) => handle_entry(&mut recipe, path, &mut iterator),
                     Some(Token::DoubleColon) => handle_association(&mut recipe, path, &mut iterator),
                     _ => {
-                        error!("Aborted due to malformed wakefile body");
-                        error!("Unexpected token {:?} in wakefile", iterator.peek());
+                        error!("Aborted due to malformed vakefile body");
+                        error!("Unexpected token {:?} in vakefile", iterator.peek());
                         exit(1);
                     }
                 }
             }
             _ => {
-                error!("Aborted due to malformed wakefile body");
-                error!("Unexpected token {:?} in wakefile", token);
+                error!("Aborted due to malformed vakefile body");
+                error!("Unexpected token {:?} in vakefile", token);
                 exit(1);
             }
         }
@@ -222,8 +222,8 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
                 "snake" => recipe.options.case_type = CaseType::Snake,
                 "kebab" => recipe.options.case_type = CaseType::Kebab,
                 _ => {
-                    error!("Aborted due to malformed wakefile options");
-                    error!("Unexpected case type {:?} in wakefile", value);
+                    error!("Aborted due to malformed vakefile options");
+                    error!("Unexpected case type {:?} in vakefile", value);
                     exit(1);
                 }
             }
@@ -258,8 +258,8 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
                         break;
                     },
                     _ => {
-                        error!("Aborted due to malformed wakefile options");
-                        error!("Unexpected token {:?} in wakefile", iterator.peek());
+                        error!("Aborted due to malformed vakefile options");
+                        error!("Unexpected token {:?} in vakefile", iterator.peek());
                         exit(1);
                     }
                 }
@@ -292,8 +292,8 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
             recipe.options.cflags = Some(value);
         },
         _ => {
-            error!("Aborted due to malformed wakefile options");
-            error!("Unexpected option {:?} in wakefile", option);
+            error!("Aborted due to malformed vakefile options");
+            error!("Unexpected option {:?} in vakefile", option);
             exit(1);
         }
     }
@@ -309,8 +309,8 @@ fn handle_association(recipe: &mut Recipe, path: PathBuf, iterator: &mut std::it
             "ServerScript" => ScriptType::ServerScript,
             "ModuleScript" => ScriptType::ModuleScript,
             _ => {
-                error!("Aborted due to malformed wakefile association");
-                error!("Unexpected script type {:?} in wakefile", iterator.peek());
+                error!("Aborted due to malformed vakefile association");
+                error!("Unexpected script type {:?} in vakefile", iterator.peek());
                 exit(1);
             }
         }
@@ -345,8 +345,8 @@ fn build_path(name: String, iterator: &mut std::iter::Peekable<std::vec::IntoIte
                 iterator.next();
             },
             _ => {
-                error!("Aborted due to malformed wakefile path");
-                error!("Unexpected token {:?} in wakefile", iterator.peek());
+                error!("Aborted due to malformed vakefile path");
+                error!("Unexpected token {:?} in vakefile", iterator.peek());
                 exit(1);
             }
         }

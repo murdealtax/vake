@@ -1,7 +1,7 @@
 use log::{ debug, warn };
 use std::path::{Path, PathBuf};
 
-const DEFAULT_WAKEFILE: &str = r#"# Wakefile Options
+const DEFAULT_vakeFILE: &str = r#"# Vakefile Options
 :active_directory = "."
 :entry_name = "main.lua"
 
@@ -13,16 +13,16 @@ server -> ServerScriptService
 client -> StarterPlayerScripts"#;
 
 pub fn check_config() -> PathBuf {
-    debug!("Checking for existance of wakefile");
+    debug!("Checking for existance of vakefile");
 
-    let names = vec![".wakefile", ".wake", "wakefile"];
+    let names = vec![".vakefile", ".vake", "vakefile"];
     let mut found = false;
-    let mut path = Path::new("wakefile").to_path_buf();
+    let mut path = Path::new("vakefile").to_path_buf();
 
     for name in names {
-        debug!("Checking for possible wakefile at {}", name);
+        debug!("Checking for possible vakefile at {}", name);
         if std::fs::metadata(name).is_ok() {
-            debug!("Found wakefile at {}", name);
+            debug!("Found vakefile at {}", name);
             found = true;
             path = Path::new(name).to_path_buf();
             break;
@@ -30,8 +30,8 @@ pub fn check_config() -> PathBuf {
     }
 
     if !found {
-        warn!("No wakefile found, creating a new one...");
-        std::fs::write("wakefile", DEFAULT_WAKEFILE).expect("Failed to create wakefile");
+        warn!("No vakefile found, creating a new one...");
+        std::fs::write("vakefile", DEFAULT_vakeFILE).expect("Failed to create vakefile");
     }
 
     return path;

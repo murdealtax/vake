@@ -2,10 +2,10 @@ use log::info;
 use std::io::Write;
 use clap::Parser;
 
-use wake::cli::Options;
-use wake::watch::config;
-use wake::parser::{check, lex, parse};
-use wake::server;
+use vake::cli::Options;
+use vake::watch::config;
+use vake::parser::{check, lex, parse};
+use vake::server;
 
 use std::fs;
 
