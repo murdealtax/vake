@@ -1,6 +1,6 @@
-use std::{path::PathBuf, process::exit};
 use crate::parser::lex::Token;
-use log::{error, debug};
+use log::{debug, error};
+use std::{path::PathBuf, process::exit};
 
 const OPTION_NAMES: [&str; 8] = [
     "active_directory",
@@ -10,7 +10,7 @@ const OPTION_NAMES: [&str; 8] = [
     "entry_name",
     "preprocess_text",
     "preprocess_pretty",
-    "preserve_folders"
+    "preserve_folders",
 ];
 
 #[derive(Debug, Clone)]
@@ -32,14 +32,14 @@ pub enum CaseType {
     Pascal,
     Camel,
     Snake,
-    Kebab
+    Kebab,
 }
 
 #[derive(Debug, Clone, Copy)]
 pub enum ScriptType {
     LocalScript,
     ServerScript,
-    ModuleScript
+    ModuleScript,
 }
 
 #[derive(Debug, Clone)]
@@ -47,38 +47,38 @@ pub enum ChildType {
     WaitChild,
     FindChild,
     CreateChild,
-    Service
+    Service,
 }
 
 #[derive(Debug, Clone)]
 pub struct RecipeAssociation {
     pub path: PathBuf,
-    pub script_type: ScriptType
+    pub script_type: ScriptType,
 }
 
 #[derive(Debug, Clone)]
 pub struct RecipePath {
     pub path: String,
-    pub child_type: ChildType
+    pub child_type: ChildType,
 }
 
 #[derive(Debug, Clone)]
 pub struct RecipeEntry {
     pub path: PathBuf,
-    pub target: Vec<RecipePath>
+    pub target: Vec<RecipePath>,
 }
 
 #[derive(Debug, Clone)]
 pub struct Recipe {
     pub options: RecipeOptions,
     pub associations: Vec<RecipeAssociation>,
-    pub entries: Vec<RecipeEntry>
+    pub entries: Vec<RecipeEntry>,
 }
 
-macro_rules !expect {
+macro_rules! expect {
     ($iterator:ident, $token:pat) => {
         match $iterator.next() {
-            Some($token) => {},
+            Some($token) => {}
             Some(token) => {
                 error!("Aborted due to malformed vakefile body");
                 error!("Unexpected token {:?} in vakefile", token);
@@ -93,7 +93,7 @@ macro_rules !expect {
     };
 }
 
-macro_rules !expect_value {
+macro_rules! expect_value {
     ($iterator:ident, $token_type:ident) => {
         match $iterator.next() {
             Some(Token::$token_type(name)) => Some(name),
@@ -107,11 +107,12 @@ macro_rules !expect_value {
                 error!("Unexpected end of file in vakefile");
                 exit(1);
             }
-        }.unwrap()
+        }
+        .unwrap()
     };
 }
 
-macro_rules !expect_boolean {
+macro_rules! expect_boolean {
     ($iterator:ident) => {
         match $iterator.next() {
             Some(Token::True) => true,
@@ -150,7 +151,7 @@ pub fn init(tokens: Vec<Token>) -> Recipe {
     let mut recipe = Recipe {
         options: default_options,
         associations: Vec::new(),
-        entries: Vec::new()
+        entries: Vec::new(),
     };
 
     while let Some(token) = iterator.next() {
@@ -167,26 +168,30 @@ pub fn init(tokens: Vec<Token>) -> Recipe {
                 expect!(iterator, Token::Equal);
 
                 handle_option(&mut recipe, option, &mut iterator);
-            },
+            }
             Token::Identifier(name) => {
                 let path = build_path(name, &mut iterator);
 
                 match iterator.peek() {
                     Some(Token::Arrow) => handle_entry(&mut recipe, path, &mut iterator),
-                    Some(Token::DoubleColon) => handle_association(&mut recipe, path, &mut iterator),
+                    Some(Token::DoubleColon) => {
+                        handle_association(&mut recipe, path, &mut iterator)
+                    }
                     _ => {
                         error!("Aborted due to malformed vakefile body");
                         error!("Unexpected token {:?} in vakefile", iterator.peek());
                         exit(1);
                     }
                 }
-            },
-            Token::Slash => {
+            }
+            Token::Slash | Token::Dot => {
                 let path = build_path(String::new(), &mut iterator);
 
                 match iterator.peek() {
                     Some(Token::Arrow) => handle_entry(&mut recipe, path, &mut iterator),
-                    Some(Token::DoubleColon) => handle_association(&mut recipe, path, &mut iterator),
+                    Some(Token::DoubleColon) => {
+                        handle_association(&mut recipe, path, &mut iterator)
+                    }
                     _ => {
                         error!("Aborted due to malformed vakefile body");
                         error!("Unexpected token {:?} in vakefile", iterator.peek());
@@ -205,14 +210,18 @@ pub fn init(tokens: Vec<Token>) -> Recipe {
     return recipe;
 }
 
-fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>) {
+fn handle_option(
+    recipe: &mut Recipe,
+    option: String,
+    iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>,
+) {
     debug!("Parsing option {}", option);
 
     match option.as_str() {
         "active_directory" => {
             let value = expect_value!(iterator, String);
             recipe.options.active_directory = PathBuf::from(value);
-        },
+        }
         "case_type" => {
             let value = expect_value!(iterator, Identifier);
 
@@ -227,11 +236,11 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
                     exit(1);
                 }
             }
-        },
+        }
         "case_abbreviations" => {
             let value = expect_boolean!(iterator);
             recipe.options.case_abbreviations = value;
-        },
+        }
         "case_exceptions" => {
             let mut exceptions = Vec::new();
 
@@ -242,7 +251,7 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
                     Some(Token::String(name)) => {
                         exceptions.push(name.clone());
                         iterator.next();
-                    },
+                    }
                     _ => {
                         expect!(iterator, Token::RightBracket);
                         break;
@@ -252,11 +261,11 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
                 match iterator.peek() {
                     Some(Token::Comma) => {
                         iterator.next();
-                    },
+                    }
                     Some(Token::RightBracket) => {
                         iterator.next();
                         break;
-                    },
+                    }
                     _ => {
                         error!("Aborted due to malformed vakefile options");
                         error!("Unexpected token {:?} in vakefile", iterator.peek());
@@ -266,31 +275,31 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
             }
 
             recipe.options.case_exceptions = exceptions;
-        },
+        }
         "entry_name" => {
             let value = expect_value!(iterator, String);
             recipe.options.entry_name = value;
-        },
+        }
         "preprocess_text" => {
             let value = expect_boolean!(iterator);
             recipe.options.preprocess_text = value;
-        },
+        }
         "preprocess_pretty" => {
             let value = expect_boolean!(iterator);
             recipe.options.preprocess_pretty = value;
-        },
+        }
         "preserve_folders" => {
             let value = expect_boolean!(iterator);
             recipe.options.preserve_folders = value;
-        },
+        }
         "cc" => {
             let value = expect_value!(iterator, String);
             recipe.options.cc = Some(value);
-        },
+        }
         "cflags" => {
             let value = expect_value!(iterator, String);
             recipe.options.cflags = Some(value);
-        },
+        }
         _ => {
             error!("Aborted due to malformed vakefile options");
             error!("Unexpected option {:?} in vakefile", option);
@@ -299,7 +308,11 @@ fn handle_option(recipe: &mut Recipe, option: String, iterator: &mut std::iter::
     }
 }
 
-fn handle_association(recipe: &mut Recipe, path: PathBuf, iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>) {
+fn handle_association(
+    recipe: &mut Recipe,
+    path: PathBuf,
+    iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>,
+) {
     iterator.next();
 
     let association = RecipeAssociation {
@@ -313,37 +326,44 @@ fn handle_association(recipe: &mut Recipe, path: PathBuf, iterator: &mut std::it
                 error!("Unexpected script type {:?} in vakefile", iterator.peek());
                 exit(1);
             }
-        }
+        },
     };
 
     recipe.associations.push(association);
 }
 
-fn handle_entry(recipe: &mut Recipe, path: PathBuf, iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>) {
+fn handle_entry(
+    recipe: &mut Recipe,
+    path: PathBuf,
+    iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>,
+) {
     iterator.next();
 
     let entry = RecipeEntry {
         path: path,
-        target: build_tree(iterator)
+        target: build_tree(iterator),
     };
 
     recipe.entries.push(entry);
 }
 
-fn build_path(name: String, iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>) -> PathBuf {
+fn build_path(
+    name: String,
+    iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>,
+) -> PathBuf {
     let mut path = PathBuf::new();
     path.push(name);
 
     loop {
         match iterator.peek() {
             Some(Token::Arrow) | Some(Token::DoubleColon) => break,
-            Some(Token::Dot) => {
+            Some(Token::Dot) | Some(Token::Slash) => {
                 iterator.next();
-            },
+            }
             Some(Token::Identifier(name)) => {
                 path.push(name);
                 iterator.next();
-            },
+            }
             _ => {
                 error!("Aborted due to malformed vakefile path");
                 error!("Unexpected token {:?} in vakefile", iterator.peek());
@@ -356,12 +376,10 @@ fn build_path(name: String, iterator: &mut std::iter::Peekable<std::vec::IntoIte
 }
 
 fn build_tree(iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>) -> Vec<RecipePath> {
-    let mut tree: Vec<RecipePath> = vec![
-        RecipePath {
-            path: expect_value!(iterator, Keyword),
-            child_type: ChildType::Service
-        }
-    ];
+    let mut tree: Vec<RecipePath> = vec![RecipePath {
+        path: expect_value!(iterator, Keyword),
+        child_type: ChildType::Service,
+    }];
 
     loop {
         match iterator.peek() {
@@ -369,24 +387,24 @@ fn build_tree(iterator: &mut std::iter::Peekable<std::vec::IntoIter<Token>>) -> 
                 iterator.next();
                 tree.push(RecipePath {
                     path: expect_value!(iterator, Identifier),
-                    child_type: ChildType::WaitChild
+                    child_type: ChildType::WaitChild,
                 })
-            },
+            }
             Some(Token::Bang) => {
                 iterator.next();
                 tree.push(RecipePath {
                     path: expect_value!(iterator, Identifier),
-                    child_type: ChildType::CreateChild
+                    child_type: ChildType::CreateChild,
                 })
-            },
+            }
             Some(Token::Dot) => {
                 iterator.next();
                 tree.push(RecipePath {
                     path: expect_value!(iterator, Identifier),
-                    child_type: ChildType::FindChild
+                    child_type: ChildType::FindChild,
                 })
-            },
-            _ => break
+            }
+            _ => break,
         }
     }
 

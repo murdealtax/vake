@@ -1,4 +1,4 @@
-use log::{ debug, warn };
+use log::{debug, warn};
 use std::path::{Path, PathBuf};
 
 const DEFAULT_VAKEFILE: &str = r#"# Vakefile Options
@@ -9,7 +9,7 @@ const DEFAULT_VAKEFILE: &str = r#"# Vakefile Options
 client :: LocalScript
 
 # Example Recipe
-/ -> ServerScriptService
+. -> ServerScriptService
 server -> ServerScriptService:Main
 client -> StarterPlayer.StarterPlayerScripts"#;
 
