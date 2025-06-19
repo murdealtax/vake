@@ -1,7 +1,7 @@
 [package]
 name = "vake"
 description = "Custom build tool for the In Silico project"
-version = "1.0.1"
+version = "1.0.2"
 edition = "2021"
 license = "MIT"
 

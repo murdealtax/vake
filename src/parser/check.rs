@@ -8,7 +8,7 @@ pub fn init(recipe: &Recipe) {
     let associations = &recipe.associations;
 
     let active_directory = options.active_directory.as_path();
-    let entry_file = active_directory.join(options.entry_name.as_str());
+    let _entry_file = active_directory.join(options.entry_name.as_str());
 
     let mut recipe_errors = 0;
 
