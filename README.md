@@ -121,4 +121,4 @@ client.shaders -> StarterPlayer.StarterPlayerScripts:Client!Shaders
 
 Vake is currently still in development, so [Pull Requests](https://github.com/murdealtax/vake/pulls) are welcome to improve and expand the project. Any encountered issues or feature requests can be reported on the [Issues](https://github.com/murdealtax/vake/issues) page of the repository.
 
-Keep in mind that this project is still being actively developed, so issues are bound to occur at any point. Vake is also trying to become more flexible, so any input in regards to making adoption easier are welcome.
+Keep in mind that this project is still being actively developed, so issues are bound to occur at any point. Vake is also trying to become more flexible, so any input in regards to making adoption easier are welcome. Feel free to reach out in the [Roblox Open Source Community](https://discord.com/invite/wH5ncNS) thread.
