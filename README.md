@@ -20,7 +20,7 @@
 
 <hr>
 
-**Vake** is an unopinionated build system written in Rust to build and sync the In Silico project to Roblox Studio. It allows you to organize your Roblox projects in the file system without being confined to a specific organizational ideology. Project structures are defined in a `vakefile`, and can be used to describe any hierarchy model in Roblox Studio.
+**Vake** is an unopinionated build system written in Rust to build and sync projects to Roblox Studio. It allows you to organize your Roblox projects in the file system without being confined to a specific organizational ideology. Project structures are defined in a `vakefile`, and can be used to describe any hierarchy model in Roblox Studio.
 
 # Installation
 
@@ -30,11 +30,15 @@ Install the CLI application by building it yourself by running `cargo build --re
 
 # Usage
 
+Once the plugin and CLI are installed, running `vake` in your project directory and clicking on the plugin in Roblox Studio to enable it will allow the changes in your editor to be synced with the Roblox Studio instance. In order to work properly, the plugin must be granted permission to make HTTP requests and create and manage scripts.
 
+Restarting the plugin will remove any scripts created by vake until they are recreated when connected to the server. Beware that any inserted children of created folders/scripts will be removed when large changes are synced or the plugin is restarted.
 
 # Configuration
 
-Run `vake` in an uninitialized directory to create a vakefile with the default configuration. The contents of the configuration file describe a `Recipe`, which contains 3 types of configuration:
+The configuration file for your vake project will be automatically detected if it has the name `vakefile`, `.vake`, or `.vakefile`. Vake will automatically look for changes in the project directory and will reflect changes in Roblox Studio according to the specified configuration. Changes to the configuration file are not currently hot-reloaded, so any changes require the CLI to be restarted.
+
+To start a new project, run `vake` in an uninitialized directory to create a vakefile with the default configuration. The contents of the configuration file describe a `Recipe`, which contains 3 types of configuration:
 
 ## Recipe Options
 
@@ -112,3 +116,9 @@ client -> StarterPlayer.StarterPlayerScripts
 client.modules -> StarterPlayer.StarterPlayerScripts:Client!Modules
 client.shaders -> StarterPlayer.StarterPlayerScripts:Client!Shaders
 ```
+
+# Contributing
+
+Vake is currently still in development, so [Pull Requests](https://github.com/murdealtax/vake/pulls) are welcome to improve and expand the project. Any encountered issues or feature requests can be reported on the [Issues](https://github.com/murdealtax/vake/issues) page of the repository.
+
+Keep in mind that this project is still being actively developed, so issues are bound to occur at any point. Vake is also trying to become more flexible, so any input in regards to making adoption easier are welcome.
